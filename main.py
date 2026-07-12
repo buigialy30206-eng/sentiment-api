@@ -10,6 +10,10 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 app = FastAPI(title="Sentiment Analysis API", version="1.0.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
 analyzer = SentimentIntensityAnalyzer()
 
 
