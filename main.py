@@ -8,8 +8,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
-app = FastAPI(title="Sentiment Analysis API", version="1.0.0", dependencies=[Depends(_rate_limit)])
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 import time as _t, threading as _th
 _rl_win, _rl_max, _rl_hits, _rl_lk = 60, 60, {}, _th.Lock()
 
@@ -27,6 +25,9 @@ async def _rate_limit(request):
         else: _rl_hits[ip] = {'s': now, 'c': 1}
     return True
 
+app = FastAPI(title="Sentiment Analysis API", version="1.0.0", dependencies=[Depends(_rate_limit)])
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+
 @app.api_route("/health", methods=["GET", "HEAD"])
 async def health():
     return {"status": "ok"}
@@ -43,21 +44,6 @@ class SentimentResult(BaseModel):
     neutral: float
 
 
-@app.api_route("/health", methods=["GET", "HEAD"])
-async def health(): return {"status": "ok"}
-
-
-@app.get("/")
-async def root(): return {"service": "Sentiment Analysis API", "version": "1.0.0"}
-
-
-@app.get("/analyze", response_model=SentimentResult)
-async def analyze(text: str = Query(..., description="Text to analyze")):
-    scores = analyzer.polarity_scores(text[:5000])
-    compound = scores["compound"]
-    if compound >= 0.05: sentiment = "Positive"
-    elif compound <= -0.05: sentiment = "Negative"
-    else: sentiment = "Neutral"
 
     return SentimentResult(text=text[:200], sentiment=sentiment, compound=round(compound, 4),
                            positive=round(scores["pos"], 4), negative=round(scores["neg"], 4),
