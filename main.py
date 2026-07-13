@@ -5,10 +5,12 @@ VADER sentiment analysis. Offline, free.
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from ratelimit import RateLimitMiddleware
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 app = FastAPI(title="Sentiment Analysis API", version="1.1.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(RateLimitMiddleware)
 
 @app.api_route("/health", methods=["GET", "HEAD"])
 async def health():
